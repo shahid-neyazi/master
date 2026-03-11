@@ -1,0 +1,1031 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ServeUp Mobile App</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body {
+  background: #0D0D0D;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh;
+  font-family: 'Outfit', sans-serif;
+  overflow: hidden;
+}
+
+/* DEVICE FRAME */
+.device-wrap {
+  display: flex; gap: 60px; align-items: flex-start;
+  padding: 40px 20px;
+}
+.device-label {
+  text-align: center; color: #444; font-size: 12px;
+  font-family: 'DM Mono', monospace; letter-spacing: 2px;
+  margin-bottom: 14px; text-transform: uppercase;
+}
+.phone {
+  width: 375px; height: 812px;
+  background: #111; border-radius: 50px;
+  border: 2px solid #2A2A2A;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.8), inset 0 0 0 1px #333, 0 0 0 6px #1A1A1A, 0 0 0 8px #222;
+  position: relative; overflow: hidden;
+  flex-shrink: 0;
+}
+.phone.ios { border-radius: 54px; }
+.phone.android { border-radius: 28px; }
+
+/* NOTCH */
+.notch {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 130px; height: 34px; background: #111;
+  border-radius: 0 0 22px 22px; z-index: 50;
+}
+.android-bar {
+  position: absolute; top: 0; left: 0; right: 0; height: 28px;
+  background: rgba(0,0,0,0.6); z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px;
+}
+.android-time { color: #fff; font-size: 11px; font-weight: 600; }
+.android-icons { color: #fff; font-size: 10px; display: flex; gap: 4px; }
+
+/* SCREEN */
+.screen {
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  background: #0E1410;
+}
+
+/* APP PAGES */
+.page {
+  position: absolute; inset: 0;
+  display: none; flex-direction: column;
+  background: #0E1410;
+  overflow: hidden;
+}
+.page.active { display: flex; }
+
+/* STATUS BAR */
+.status-bar {
+  height: 44px; padding: 12px 24px 0;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0; z-index: 10;
+}
+.status-time { font-size: 15px; font-weight: 700; color: #fff; }
+.status-icons { display: flex; align-items: center; gap: 5px; color: #fff; font-size: 13px; }
+
+/* SCROLL AREA */
+.scroll-area {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* BOTTOM NAV */
+.bottom-nav {
+  height: 80px; background: #111;
+  border-top: 1px solid #1E2A1E;
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 0 8px 16px; flex-shrink: 0;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 16px; cursor: pointer; transition: all .2s;
+  border-radius: 12px; min-width: 60px;
+}
+.nav-item.active { background: rgba(0,200,83,0.1); }
+.nav-icon { font-size: 22px; line-height: 1; }
+.nav-label { font-size: 10px; font-weight: 500; color: #4A5E4A; font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
+.nav-item.active .nav-label { color: #00C853; }
+
+/* ========== SPLASH / ONBOARDING ========== */
+#splash {
+  background: linear-gradient(160deg, #0A1F0E 0%, #0E1410 50%, #071208 100%);
+  align-items: center; justify-content: center;
+  padding: 40px 32px;
+}
+.splash-glow {
+  position: absolute; width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(0,200,83,0.15) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%, -60%);
+}
+.splash-logo { font-family: 'Bebas Neue'; font-size: 72px; letter-spacing: 6px; color: #00C853; line-height: 1; position: relative; }
+.splash-logo span { color: #AEEA00; }
+.splash-tagline { font-size: 15px; color: #5A7A5A; text-align: center; margin: 8px 0 60px; letter-spacing: 1px; font-weight: 400; position: relative; }
+.splash-court {
+  position: absolute; bottom: 180px; left: 0; right: 0;
+  height: 200px; opacity: 0.04;
+  border: 2px solid #00C853;
+  margin: 0 40px;
+}
+.splash-court::after { content:''; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: #00C853; }
+.splash-court::before { content:''; position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: #00C853; }
+.btn-splash {
+  width: 100%; padding: 18px; background: #00C853; border: none;
+  border-radius: 16px; font-size: 16px; font-weight: 700; color: #071208;
+  cursor: pointer; letter-spacing: 0.5px; transition: all .15s; position: relative;
+}
+.btn-splash:active { transform: scale(0.98); }
+.btn-splash-outline {
+  width: 100%; padding: 16px; background: transparent; border: 1.5px solid #1E2E1E;
+  border-radius: 16px; font-size: 16px; font-weight: 600; color: #6A8A6A;
+  cursor: pointer; margin-top: 12px; transition: all .15s;
+}
+.btn-splash-outline:active { border-color: #00C853; color: #00C853; }
+
+/* ========== HOME ========== */
+#home .scroll-area { padding: 16px 20px 20px; }
+.home-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.home-greeting { font-size: 13px; color: #4A6A4A; font-weight: 500; }
+.home-name { font-size: 22px; font-weight: 700; color: #E8F5E9; margin-top: 2px; }
+.avatar-btn { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #00C853, #AEEA00); display: flex; align-items: center; justify-content: center; font-weight: 700; color: #071208; font-size: 16px; cursor: pointer; }
+
+.search-bar {
+  background: #161E16; border: 1px solid #1E2A1E; border-radius: 14px;
+  padding: 14px 18px; display: flex; align-items: center; gap: 10px;
+  margin-bottom: 24px; cursor: pointer;
+}
+.search-bar span:first-child { font-size: 18px; }
+.search-bar span:last-child { color: #3A503A; font-size: 14px; }
+
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.section-title-sm { font-size: 16px; font-weight: 700; color: #E8F5E9; }
+.see-all { font-size: 12px; color: #00C853; font-weight: 600; cursor: pointer; font-family: 'DM Mono', monospace; }
+
+/* STATS STRIP */
+.stats-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 24px; }
+.stat-card { background: #161E16; border: 1px solid #1E2A1E; border-radius: 14px; padding: 16px 12px; text-align: center; }
+.stat-num { font-family: 'Bebas Neue'; font-size: 28px; color: #00C853; letter-spacing: 1px; }
+.stat-lbl { font-size: 10px; color: #3A503A; font-family: 'DM Mono'; margin-top: 2px; letter-spacing: 0.5px; }
+
+/* QUICK ACTIONS */
+.quick-actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 24px; }
+.quick-btn { background: #161E16; border: 1px solid #1E2A1E; border-radius: 14px; padding: 14px 8px; text-align: center; cursor: pointer; transition: all .15s; }
+.quick-btn:active { transform: scale(0.95); background: rgba(0,200,83,0.1); border-color: #00C853; }
+.quick-btn .qicon { font-size: 22px; margin-bottom: 6px; }
+.quick-btn .qlabel { font-size: 10px; color: #4A6A4A; font-weight: 500; }
+
+/* NEARBY PLAYERS HORIZONTAL SCROLL */
+.h-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 24px; }
+.h-scroll::-webkit-scrollbar { display: none; }
+.player-chip {
+  background: #161E16; border: 1px solid #1E2A1E; border-radius: 16px;
+  padding: 16px; min-width: 140px; cursor: pointer; transition: all .15s; flex-shrink: 0;
+}
+.player-chip:active { transform: scale(0.97); border-color: rgba(0,200,83,0.4); }
+.chip-avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #00C853, #AEEA00); display: flex; align-items: center; justify-content: center; font-weight: 700; color: #071208; font-size: 16px; margin-bottom: 10px; position: relative; }
+.online-dot { position: absolute; bottom: 1px; right: 1px; width: 12px; height: 12px; background: #00C853; border-radius: 50%; border: 2px solid #161E16; }
+.chip-name { font-size: 13px; font-weight: 600; color: #E8F5E9; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip-level { font-size: 10px; color: #4A6A4A; font-family: 'DM Mono'; }
+.chip-city { font-size: 11px; color: #3A503A; margin-top: 4px; }
+
+/* UPCOMING MATCH CARD */
+.match-card {
+  background: linear-gradient(135deg, #0D2010 0%, #112015 100%);
+  border: 1px solid #1E3A20; border-radius: 18px;
+  padding: 20px; margin-bottom: 24px;
+  position: relative; overflow: hidden;
+}
+.match-card::before {
+  content: '🎾'; position: absolute; right: 16px; top: 16px;
+  font-size: 48px; opacity: 0.15;
+}
+.match-tag { font-size: 10px; font-family: 'DM Mono'; color: #00C853; letter-spacing: 1.5px; margin-bottom: 8px; text-transform: uppercase; }
+.match-title { font-size: 18px; font-weight: 700; color: #E8F5E9; margin-bottom: 12px; }
+.match-meta { display: flex; gap: 16px; }
+.match-meta-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #5A7A5A; }
+.match-btn { margin-top: 16px; background: #00C853; border: none; border-radius: 10px; padding: 11px 20px; font-size: 13px; font-weight: 700; color: #071208; cursor: pointer; }
+
+/* ========== EXPLORE (SEARCH) ========== */
+#explore .scroll-area { padding: 16px 20px 20px; }
+.filter-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 20px; }
+.filter-chips::-webkit-scrollbar { display: none; }
+.chip {
+  padding: 8px 16px; border-radius: 100px; font-size: 12px; font-weight: 600;
+  cursor: pointer; white-space: nowrap; transition: all .15s; flex-shrink: 0;
+  border: 1px solid #1E2A1E; background: #161E16; color: #4A6A4A;
+}
+.chip.active { background: rgba(0,200,83,0.15); border-color: #00C853; color: #00C853; }
+.chip:active { transform: scale(0.96); }
+
+.player-row {
+  background: #161E16; border: 1px solid #1E2A1E; border-radius: 16px;
+  padding: 16px; margin-bottom: 12px; display: flex; gap: 14px;
+  align-items: center; cursor: pointer; transition: all .15s;
+}
+.player-row:active { transform: scale(0.99); border-color: rgba(0,200,83,0.3); }
+.row-avatar { width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, #00C853, #AEEA00); display: flex; align-items: center; justify-content: center; font-weight: 700; color: #071208; font-size: 18px; flex-shrink: 0; }
+.row-avatar.orange { background: linear-gradient(135deg, #FF6B35, #FFB300); }
+.row-avatar.blue { background: linear-gradient(135deg, #2196F3, #00BCD4); }
+.row-info { flex: 1; min-width: 0; }
+.row-name { font-size: 15px; font-weight: 700; color: #E8F5E9; }
+.row-sub { font-size: 12px; color: #4A6A4A; margin-top: 2px; }
+.row-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.tag { padding: 3px 10px; border-radius: 100px; font-size: 10px; font-family: 'DM Mono'; border: 1px solid; }
+.tag-green { color: #00C853; border-color: rgba(0,200,83,0.3); background: rgba(0,200,83,0.08); }
+.tag-orange { color: #FF6B35; border-color: rgba(255,107,53,0.3); background: rgba(255,107,53,0.08); }
+.tag-lime { color: #AEEA00; border-color: rgba(174,234,0,0.3); background: rgba(174,234,0,0.08); }
+.row-right { text-align: right; flex-shrink: 0; }
+.row-rate { font-family: 'Bebas Neue'; font-size: 20px; color: #00C853; letter-spacing: 1px; }
+.row-rate-label { font-size: 10px; color: #3A503A; font-family: 'DM Mono'; }
+.row-stars { font-size: 11px; color: #AEEA00; margin-top: 4px; }
+
+/* ========== BOOKING ========== */
+#booking .scroll-area { padding: 16px 20px 20px; }
+.booking-tabs { display: flex; background: #161E16; border-radius: 12px; padding: 4px; margin-bottom: 20px; }
+.btab { flex: 1; padding: 10px; text-align: center; font-size: 13px; font-weight: 600; color: #3A503A; cursor: pointer; border-radius: 10px; transition: all .2s; }
+.btab.active { background: #00C853; color: #071208; }
+
+.calendar-strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 20px; }
+.calendar-strip::-webkit-scrollbar { display: none; }
+.cal-day { min-width: 52px; background: #161E16; border: 1px solid #1E2A1E; border-radius: 12px; padding: 10px 6px; text-align: center; cursor: pointer; transition: all .15s; flex-shrink: 0; }
+.cal-day.active { background: rgba(0,200,83,0.15); border-color: #00C853; }
+.cal-day:active { transform: scale(0.95); }
+.cal-dow { font-size: 10px; color: #3A503A; font-family: 'DM Mono'; text-transform: uppercase; }
+.cal-date { font-family: 'Bebas Neue'; font-size: 22px; color: #E8F5E9; line-height: 1.2; }
+.cal-day.active .cal-date { color: #00C853; }
+
+.slot-list { display: flex; flex-direction: column; gap: 10px; }
+.slot-item {
+  background: #161E16; border: 1px solid #1E2A1E; border-radius: 14px;
+  padding: 16px 18px; display: flex; align-items: center; cursor: pointer; transition: all .15s;
+}
+.slot-item.booked { opacity: 0.5; cursor: default; }
+.slot-item:not(.booked):active { transform: scale(0.99); border-color: rgba(0,200,83,0.4); }
+.slot-time-text { font-family: 'Bebas Neue'; font-size: 22px; color: #E8F5E9; letter-spacing: 1px; min-width: 90px; }
+.slot-meta { flex: 1; padding: 0 12px; }
+.slot-player { font-size: 13px; font-weight: 600; color: #E8F5E9; }
+.slot-court { font-size: 11px; color: #4A6A4A; margin-top: 2px; }
+.slot-status-pill { padding: 5px 12px; border-radius: 100px; font-size: 10px; font-family: 'DM Mono'; font-weight: 700; letter-spacing: 0.5px; }
+.pill-green { background: rgba(0,200,83,0.15); color: #00C853; border: 1px solid rgba(0,200,83,0.3); }
+.pill-gray { background: rgba(255,255,255,0.05); color: #3A503A; border: 1px solid #1E2A1E; }
+
+/* ========== CHAT ========== */
+#chat-page .scroll-area { padding: 16px 20px 20px; }
+.chat-list-item {
+  display: flex; gap: 12px; align-items: center;
+  padding: 14px 0; border-bottom: 1px solid #161E16; cursor: pointer;
+}
+.chat-list-item:active .chat-list-avatar { transform: scale(0.95); }
+.chat-list-avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #00C853, #AEEA00); display: flex; align-items: center; justify-content: center; font-weight: 700; color: #071208; font-size: 17px; flex-shrink: 0; position: relative; transition: transform .15s; }
+.chat-list-avatar.orange { background: linear-gradient(135deg, #FF6B35, #FFB300); }
+.chat-list-avatar.blue { background: linear-gradient(135deg, #2196F3, #00BCD4); }
+.unread-badge { position: absolute; top: -2px; right: -2px; width: 18px; height: 18px; background: #00C853; border-radius: 50%; border: 2px solid #0E1410; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #071208; }
+.chat-list-info { flex: 1; min-width: 0; }
+.chat-list-name { font-size: 15px; font-weight: 700; color: #E8F5E9; }
+.chat-list-preview { font-size: 12px; color: #3A503A; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-list-time { font-size: 11px; color: #2A3A2A; font-family: 'DM Mono'; }
+
+/* OPEN CHAT */
+#open-chat {
+  background: #0E1410;
+}
+.chat-header-bar {
+  padding: 10px 16px 12px;
+  background: #111; border-bottom: 1px solid #161E16;
+  display: flex; align-items: center; gap: 12px;
+}
+.back-btn { font-size: 22px; cursor: pointer; color: #00C853; padding: 4px; }
+.chat-header-info { flex: 1; }
+.chat-header-name { font-size: 16px; font-weight: 700; color: #E8F5E9; }
+.chat-header-status { font-size: 11px; color: #00C853; font-family: 'DM Mono'; }
+.messages-area { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.messages-area::-webkit-scrollbar { display: none; }
+.msg-bubble-wrap { display: flex; flex-direction: column; max-width: 78%; }
+.msg-bubble-wrap.me { align-self: flex-end; align-items: flex-end; }
+.msg-bubble-wrap.them { align-self: flex-start; align-items: flex-start; }
+.bubble { padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.5; }
+.them .bubble { background: #161E16; color: #C8DCC8; border-radius: 4px 18px 18px 18px; }
+.me .bubble { background: #00C853; color: #071208; font-weight: 500; border-radius: 18px 4px 18px 18px; }
+.msg-time-sm { font-size: 10px; color: #2A3A2A; font-family: 'DM Mono'; margin-top: 4px; }
+.chat-input-bar {
+  padding: 12px 16px; background: #111; border-top: 1px solid #161E16;
+  display: flex; gap: 10px; align-items: center;
+}
+.chat-input-field { flex: 1; background: #161E16; border: 1px solid #1E2A1E; border-radius: 22px; padding: 11px 18px; font-family: 'Outfit'; font-size: 14px; color: #E8F5E9; outline: none; }
+.chat-input-field::placeholder { color: #2A3A2A; }
+.send-btn { width: 42px; height: 42px; background: #00C853; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: all .15s; flex-shrink: 0; }
+.send-btn:active { transform: scale(0.9); background: #AEEA00; }
+
+/* ========== PROFILE ========== */
+#profile-page .scroll-area { padding: 0 0 20px; }
+.profile-hero {
+  padding: 20px 20px 24px;
+  background: linear-gradient(160deg, #0A1F0E, #0E1410);
+  text-align: center;
+  border-bottom: 1px solid #161E16;
+}
+.profile-big-avatar {
+  width: 88px; height: 88px; border-radius: 50%;
+  background: linear-gradient(135deg, #00C853, #AEEA00);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue'; font-size: 34px; color: #071208;
+  margin: 0 auto 12px; border: 3px solid rgba(0,200,83,0.3);
+}
+.profile-full-name { font-size: 22px; font-weight: 700; color: #E8F5E9; }
+.profile-handle { font-size: 13px; color: #4A6A4A; font-family: 'DM Mono'; margin-top: 2px; }
+.profile-level-badge { display: inline-block; padding: 5px 14px; border-radius: 100px; font-size: 11px; font-family: 'DM Mono'; background: rgba(0,200,83,0.15); color: #00C853; border: 1px solid rgba(0,200,83,0.3); margin: 10px 0 14px; }
+.profile-stats-row { display: flex; justify-content: center; gap: 32px; }
+.pstat { text-align: center; }
+.pstat-n { font-family: 'Bebas Neue'; font-size: 26px; color: #00C853; letter-spacing: 1px; }
+.pstat-l { font-size: 10px; color: #3A503A; font-family: 'DM Mono'; margin-top: 2px; }
+
+.profile-section { padding: 20px; border-bottom: 1px solid #161E16; }
+.profile-section-title { font-size: 12px; font-family: 'DM Mono'; color: #3A503A; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 14px; }
+.info-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+.info-icon { font-size: 18px; width: 24px; text-align: center; }
+.info-label { font-size: 12px; color: #3A503A; flex: 1; }
+.info-value { font-size: 14px; font-weight: 600; color: #C8DCC8; }
+
+.edit-profile-btn { margin: 16px 20px 0; display: block; width: calc(100% - 40px); padding: 15px; background: #00C853; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; color: #071208; cursor: pointer; text-align: center; letter-spacing: 0.5px; }
+
+/* PAGE HEADER */
+.page-header { padding: 8px 20px 16px; display: flex; align-items: center; justify-content: space-between; }
+.page-title { font-family: 'Bebas Neue'; font-size: 32px; color: #E8F5E9; letter-spacing: 2px; }
+.header-action { width: 38px; height: 38px; background: #161E16; border: 1px solid #1E2A1E; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+
+/* ANIMATIONS */
+@keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+.page.active { animation: fadeIn 0.25s ease; }
+
+/* TOAST */
+.app-toast {
+  position: absolute; bottom: 90px; left: 16px; right: 16px; z-index: 200;
+  background: #1A2E1A; border: 1px solid rgba(0,200,83,0.4); border-radius: 14px;
+  padding: 14px 18px; display: none;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: toastSlide 0.25s ease;
+}
+@keyframes toastSlide { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+.app-toast.show { display: block; }
+.toast-t { font-size: 13px; font-weight: 700; color: #00C853; margin-bottom: 2px; }
+.toast-m { font-size: 12px; color: #5A7A5A; }
+
+/* DEVICE SWITCHER */
+.switcher { display: flex; gap: 12px; justify-content: center; margin-bottom: 24px; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 100; }
+.sw-btn { padding: 10px 24px; border-radius: 100px; border: 1px solid #333; background: #1A1A1A; color: #888; font-family: 'DM Mono'; font-size: 12px; cursor: pointer; transition: all .2s; letter-spacing: 1px; }
+.sw-btn.active { background: #00C853; color: #071208; border-color: #00C853; font-weight: 700; }
+
+/* ONLY SHOW ONE PHONE AT A TIME ON SMALL SCREENS */
+@media (max-width: 900px) {
+  body { overflow: auto; }
+  .device-wrap { flex-direction: column; align-items: center; padding-bottom: 100px; }
+}
+</style>
+</head>
+<body>
+
+<div class="device-wrap">
+
+  <!-- iOS DEVICE -->
+  <div>
+    <div class="device-label">📱 iOS — iPhone 14</div>
+    <div class="phone ios" id="iosPhone">
+      <div class="notch"></div>
+      <div class="screen">
+
+        <!-- SPLASH -->
+        <div class="page active" id="splash">
+          <div class="splash-glow"></div>
+          <div class="splash-court"></div>
+          <div style="position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;">
+            <div style="margin-bottom:6px;font-size:13px;color:#2A4A2A;font-family:'DM Mono';letter-spacing:2px;text-transform:uppercase;">Welcome to</div>
+            <div class="splash-logo">SERVE<span>UP</span></div>
+            <div class="splash-tagline">Find. Book. Play. Together.</div>
+            <div style="width:64px;height:2px;background:linear-gradient(90deg,#00C853,#AEEA00);border-radius:2px;margin-bottom:48px;"></div>
+            <div style="width:100%;padding:0 32px;">
+              <button class="btn-splash" onclick="goToPage('home','ios')">Get Started 🎾</button>
+              <button class="btn-splash-outline" onclick="openLoginModal()">I already have an account</button>
+            </div>
+            <div style="margin-top:32px;font-size:11px;color:#1E2E1E;font-family:'DM Mono';text-align:center;">By continuing you agree to our<br>Terms of Service & Privacy Policy</div>
+          </div>
+        </div>
+
+        <!-- HOME -->
+        <div class="page" id="home">
+          <div class="status-bar">
+            <span class="status-time">9:41</span>
+            <div class="status-icons">📶 🔋</div>
+          </div>
+          <div class="scroll-area">
+            <div class="home-header">
+              <div>
+                <div class="home-greeting">Good morning 👋</div>
+                <div class="home-name">Rahul Sharma</div>
+              </div>
+              <div class="avatar-btn" onclick="goToPage('profile-page','ios')">RS</div>
+            </div>
+
+            <!-- SEARCH BAR -->
+            <div class="search-bar" onclick="goToPage('explore','ios')">
+              <span>🔍</span>
+              <span>Search players, courts, cities...</span>
+            </div>
+
+            <!-- STATS -->
+            <div class="stats-strip">
+              <div class="stat-card"><div class="stat-num">12</div><div class="stat-lbl">Matches</div></div>
+              <div class="stat-card"><div class="stat-num">8</div><div class="stat-lbl">Wins</div></div>
+              <div class="stat-card"><div class="stat-num">4.7</div><div class="stat-lbl">Rating</div></div>
+            </div>
+
+            <!-- UPCOMING MATCH -->
+            <div class="match-card">
+              <div class="match-tag">⏰ UPCOMING MATCH</div>
+              <div class="match-title">vs Vikram Singh</div>
+              <div class="match-meta">
+                <div class="match-meta-item">📅 <span>Sat, Mar 15</span></div>
+                <div class="match-meta-item">🕕 <span>6:00 PM</span></div>
+                <div class="match-meta-item">📍 <span>DLTA Court 4</span></div>
+              </div>
+              <button class="match-btn" onclick="showToast('ios','Chat with Vikram','Opening conversation...')">View Details →</button>
+            </div>
+
+            <!-- QUICK ACTIONS -->
+            <div class="section-header"><div class="section-title-sm">Quick Actions</div></div>
+            <div class="quick-actions">
+              <div class="quick-btn" onclick="goToPage('explore','ios')"><div class="qicon">🔍</div><div class="qlabel">Find</div></div>
+              <div class="quick-btn" onclick="goToPage('booking','ios')"><div class="qicon">📅</div><div class="qlabel">Book</div></div>
+              <div class="quick-btn" onclick="goToPage('chat-page','ios')"><div class="qicon">💬</div><div class="qlabel">Chat</div></div>
+              <div class="quick-btn" onclick="showToast('ios','Payments','Opens payment dashboard')"><div class="qicon">💳</div><div class="qlabel">Pay</div></div>
+            </div>
+
+            <!-- NEARBY PLAYERS -->
+            <div class="section-header">
+              <div class="section-title-sm">Nearby Players</div>
+              <div class="see-all" onclick="goToPage('explore','ios')">SEE ALL →</div>
+            </div>
+            <div class="h-scroll">
+              <div class="player-chip" onclick="showToast('ios','Priya Nair','Advanced · Mumbai · Free')"><div class="chip-avatar">PN<div class="online-dot"></div></div><div class="chip-name">Priya Nair</div><div class="chip-level">ADVANCED</div><div class="chip-city">📍 Mumbai</div></div>
+              <div class="player-chip" onclick="showToast('ios','Arjun Mehta','Intermediate · ₹400/hr')"><div class="chip-avatar" style="background:linear-gradient(135deg,#FF6B35,#FFB300)">AM<div class="online-dot"></div></div><div class="chip-name">Arjun Mehta</div><div class="chip-level">INTERMEDIATE</div><div class="chip-city">📍 Mumbai</div></div>
+              <div class="player-chip" onclick="showToast('ios','Kiran Desai','Beginner · Free')"><div class="chip-avatar" style="background:linear-gradient(135deg,#2196F3,#00BCD4)">KD</div><div class="chip-name">Kiran Desai</div><div class="chip-level">BEGINNER</div><div class="chip-city">📍 Thane</div></div>
+              <div class="player-chip" onclick="showToast('ios','Meera Joshi','Pro · ₹1200/hr')"><div class="chip-avatar" style="background:linear-gradient(135deg,#9C27B0,#E91E63)">MJ<div class="online-dot"></div></div><div class="chip-name">Meera Joshi</div><div class="chip-level">PROFESSIONAL</div><div class="chip-city">📍 Pune</div></div>
+            </div>
+
+            <!-- RECENT REVIEWS -->
+            <div class="section-header"><div class="section-title-sm">Recent Feedback</div></div>
+            <div style="background:#161E16;border:1px solid #1E2A1E;border-radius:16px;padding:16px;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#FF6B35,#FFB300);display:flex;align-items:center;justify-content:center;font-weight:700;color:#071208;font-size:13px;">AM</div>
+                <div><div style="font-size:13px;font-weight:700;color:#E8F5E9;">Arjun Mehta</div><div style="font-size:11px;color:#AEEA00;">★★★★★</div></div>
+              </div>
+              <div style="font-size:13px;color:#4A6A4A;line-height:1.6;">"Great player, punctual and sportive. Would love to play again!"</div>
+            </div>
+
+            <div style="height: 20px;"></div>
+          </div>
+
+          <!-- BOTTOM NAV -->
+          <div class="bottom-nav">
+            <div class="nav-item active" onclick="setActiveNav(this,'ios');goToPage('home','ios')"><div class="nav-icon">🏠</div><div class="nav-label">HOME</div></div>
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('explore','ios')"><div class="nav-icon">🔍</div><div class="nav-label">EXPLORE</div></div>
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('booking','ios')"><div class="nav-icon">📅</div><div class="nav-label">BOOK</div></div>
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('chat-page','ios')"><div class="nav-icon">💬</div><div class="nav-label">CHAT</div></div>
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('profile-page','ios')"><div class="nav-icon">👤</div><div class="nav-label">PROFILE</div></div>
+          </div>
+          <div class="app-toast" id="toast-ios"><div class="toast-t" id="toast-t-ios"></div><div class="toast-m" id="toast-m-ios"></div></div>
+        </div>
+
+        <!-- EXPLORE -->
+        <div class="page" id="explore">
+          <div class="status-bar"><span class="status-time">9:41</span><div class="status-icons">📶 🔋</div></div>
+          <div class="page-header">
+            <div class="page-title">FIND PLAYERS</div>
+            <div class="header-action">⚙️</div>
+          </div>
+          <div class="scroll-area">
+            <div style="padding: 0 20px;">
+              <div class="search-bar" style="margin-bottom:16px;"><span>🔍</span><span>Mumbai, Advanced, Evenings...</span></div>
+              <div class="filter-chips">
+                <div class="chip active">All</div>
+                <div class="chip" onclick="toggleChip(this)">Beginner</div>
+                <div class="chip" onclick="toggleChip(this)">Intermediate</div>
+                <div class="chip" onclick="toggleChip(this)">Advanced</div>
+                <div class="chip" onclick="toggleChip(this)">Pro</div>
+                <div class="chip" onclick="toggleChip(this)">Free</div>
+                <div class="chip" onclick="toggleChip(this)">Coaches</div>
+              </div>
+            </div>
+            <div style="padding: 0 20px;">
+              <div class="player-row" onclick="showToast('ios','Rahul Khanna booked!','Check your bookings tab')">
+                <div class="row-avatar">RK</div>
+                <div class="row-info">
+                  <div class="row-name">Rahul Khanna</div>
+                  <div class="row-sub">📍 Mumbai · Evenings</div>
+                  <div class="row-tags"><span class="tag tag-orange">Advanced</span><span class="tag tag-green">● Online</span></div>
+                </div>
+                <div class="row-right"><div class="row-rate">₹500</div><div class="row-rate-label">/hr</div><div class="row-stars">★ 4.8</div></div>
+              </div>
+              <div class="player-row" onclick="showToast('ios','Priya Nair','Free to play · Weekends')">
+                <div class="row-avatar orange">PN</div>
+                <div class="row-info">
+                  <div class="row-name">Priya Nair</div>
+                  <div class="row-sub">📍 Bangalore · Weekends</div>
+                  <div class="row-tags"><span class="tag tag-lime">Intermediate</span></div>
+                </div>
+                <div class="row-right"><div class="row-rate" style="color:#AEEA00;">FREE</div><div class="row-rate-label">/session</div><div class="row-stars">★ 4.5</div></div>
+              </div>
+              <div class="player-row" onclick="showToast('ios','Vikram Singh — Pro Coach','₹1200/hr · Mornings available')">
+                <div class="row-avatar blue">VS</div>
+                <div class="row-info">
+                  <div class="row-name">Vikram Singh</div>
+                  <div class="row-sub">📍 Delhi · Mornings</div>
+                  <div class="row-tags"><span class="tag tag-orange">Professional</span><span class="tag tag-green">Coach</span></div>
+                </div>
+                <div class="row-right"><div class="row-rate">₹1200</div><div class="row-rate-label">/hr</div><div class="row-stars">★ 4.9</div></div>
+              </div>
+              <div class="player-row" onclick="showToast('ios','Aisha Patel','Beginner · Free · Weekends')">
+                <div class="row-avatar" style="background:linear-gradient(135deg,#9C27B0,#E91E63)">AP</div>
+                <div class="row-info">
+                  <div class="row-name">Aisha Patel</div>
+                  <div class="row-sub">📍 Mumbai · Weekends</div>
+                  <div class="row-tags"><span class="tag tag-lime">Beginner</span></div>
+                </div>
+                <div class="row-right"><div class="row-rate" style="color:#AEEA00;">FREE</div><div class="row-rate-label">/session</div><div class="row-stars">★ 4.2</div></div>
+              </div>
+              <div class="player-row" onclick="showToast('ios','Arjun Mehta','Advanced · ₹400/hr · Evenings')">
+                <div class="row-avatar" style="background:linear-gradient(135deg,#FF6B35,#AEEA00)">AM</div>
+                <div class="row-info">
+                  <div class="row-name">Arjun Mehta</div>
+                  <div class="row-sub">📍 Hyderabad · Evenings</div>
+                  <div class="row-tags"><span class="tag tag-orange">Advanced</span><span class="tag tag-green">● Online</span></div>
+                </div>
+                <div class="row-right"><div class="row-rate">₹400</div><div class="row-rate-label">/hr</div><div class="row-stars">★ 4.7</div></div>
+              </div>
+              <div class="player-row" onclick="showToast('ios','Sana Mirza','Intermediate · Free · Mornings')">
+                <div class="row-avatar" style="background:linear-gradient(135deg,#00BCD4,#2196F3)">SM</div>
+                <div class="row-info">
+                  <div class="row-name">Sana Mirza</div>
+                  <div class="row-sub">📍 Chennai · Mornings</div>
+                  <div class="row-tags"><span class="tag tag-lime">Intermediate</span></div>
+                </div>
+                <div class="row-right"><div class="row-rate" style="color:#AEEA00;">FREE</div><div class="row-rate-label">/session</div><div class="row-stars">★ 4.6</div></div>
+              </div>
+            </div>
+            <div style="height:20px;"></div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('home','ios')"><div class="nav-icon">🏠</div><div class="nav-label">HOME</div></div>
+            <div class="nav-item active" onclick="setActiveNav(this,'ios')"><div class="nav-icon">🔍</div><div class="nav-label">EXPLORE</div></div>
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('booking','ios')"><div class="nav-icon">📅</div><div class="nav-label">BOOK</div></div>
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('chat-page','ios')"><div class="nav-icon">💬</div><div class="nav-label">CHAT</div></div>
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('profile-page','ios')"><div class="nav-icon">👤</div><div class="nav-label">PROFILE</div></div>
+          </div>
+        </div>
+
+        <!-- BOOKING -->
+        <div class="page" id="booking">
+          <div class="status-bar"><span class="status-time">9:41</span><div class="status-icons">📶 🔋</div></div>
+          <div class="page-header"><div class="page-title">BOOKINGS</div><div class="header-action" onclick="showToast('ios','New Slot Added!','Your new slot is now visible to others')">＋</div></div>
+          <div class="scroll-area">
+            <div style="padding:0 20px;">
+              <div class="booking-tabs">
+                <div class="btab active" onclick="switchBTab(this)">Available</div>
+                <div class="btab" onclick="switchBTab(this)">My Bookings</div>
+                <div class="btab" onclick="switchBTab(this)">History</div>
+              </div>
+              <div class="calendar-strip">
+                <div class="cal-day"><div class="cal-dow">MON</div><div class="cal-date">17</div></div>
+                <div class="cal-day active"><div class="cal-dow">TUE</div><div class="cal-date">18</div></div>
+                <div class="cal-day"><div class="cal-dow">WED</div><div class="cal-date">19</div></div>
+                <div class="cal-day"><div class="cal-dow">THU</div><div class="cal-date">20</div></div>
+                <div class="cal-day"><div class="cal-dow">FRI</div><div class="cal-date">21</div></div>
+                <div class="cal-day"><div class="cal-dow">SAT</div><div class="cal-date">22</div></div>
+                <div class="cal-day"><div class="cal-dow">SUN</div><div class="cal-date">23</div></div>
+              </div>
+              <div class="slot-list">
+                <div class="slot-item" onclick="bookSlotApp('ios','6:00 AM')"><div class="slot-time-text">6:00 AM</div><div class="slot-meta"><div class="slot-player">Open Slot</div><div class="slot-court">DLTA Complex, Court 2</div></div><div class="slot-status-pill pill-green">OPEN</div></div>
+                <div class="slot-item booked"><div class="slot-time-text">8:00 AM</div><div class="slot-meta"><div class="slot-player">Vikram vs Rahul</div><div class="slot-court">DLTA Complex, Court 1</div></div><div class="slot-status-pill pill-gray">BOOKED</div></div>
+                <div class="slot-item" onclick="bookSlotApp('ios','10:00 AM')"><div class="slot-time-text">10:00 AM</div><div class="slot-meta"><div class="slot-player">Open Slot</div><div class="slot-court">CCI Courts, Court A</div></div><div class="slot-status-pill pill-green">OPEN</div></div>
+                <div class="slot-item" onclick="bookSlotApp('ios','5:00 PM')"><div class="slot-time-text">5:00 PM</div><div class="slot-meta"><div class="slot-player">Open Slot</div><div class="slot-court">Willingdon Club</div></div><div class="slot-status-pill pill-green">OPEN</div></div>
+                <div class="slot-item booked"><div class="slot-time-text">7:00 PM</div><div class="slot-meta"><div class="slot-player">Priya vs Aisha</div><div class="slot-court">CCI Courts, Court B</div></div><div class="slot-status-pill pill-gray">BOOKED</div></div>
+              </div>
+            </div>
+            <div style="height:20px;"></div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('home','ios')"><div class="nav-icon">🏠</div><div class="nav-label">HOME</div></div>
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('explore','ios')"><div class="nav-icon">🔍</div><div class="nav-label">EXPLORE</div></div>
+            <div class="nav-item active"><div class="nav-icon">📅</div><div class="nav-label">BOOK</div></div>
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('chat-page','ios')"><div class="nav-icon">💬</div><div class="nav-label">CHAT</div></div>
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('profile-page','ios')"><div class="nav-icon">👤</div><div class="nav-label">PROFILE</div></div>
+          </div>
+        </div>
+
+        <!-- CHAT LIST -->
+        <div class="page" id="chat-page">
+          <div class="status-bar"><span class="status-time">9:41</span><div class="status-icons">📶 🔋</div></div>
+          <div class="page-header"><div class="page-title">MESSAGES</div><div class="header-action" onclick="showToast('ios','New Chat','Select a player to start chatting')">✏️</div></div>
+          <div class="scroll-area" style="padding:0 20px;">
+            <div class="chat-list-item" onclick="goToPage('open-chat','ios')"><div class="chat-list-avatar">RK<div class="unread-badge">3</div></div><div class="chat-list-info"><div class="chat-list-name">Rahul Khanna</div><div class="chat-list-preview">Let's confirm the Saturday booking 🎾</div></div><div class="chat-list-time">9:38 AM</div></div>
+            <div class="chat-list-item" onclick="goToPage('open-chat','ios')"><div class="chat-list-avatar orange">VS</div><div class="chat-list-info"><div class="chat-list-name">Vikram Singh</div><div class="chat-list-preview">Your backhand is improving a lot!</div></div><div class="chat-list-time">Yesterday</div></div>
+            <div class="chat-list-item" onclick="goToPage('open-chat','ios')"><div class="chat-list-avatar blue">PN<div class="unread-badge">1</div></div><div class="chat-list-info"><div class="chat-list-name">Priya Nair</div><div class="chat-list-preview">Are you free this weekend for doubles?</div></div><div class="chat-list-time">Mon</div></div>
+            <div class="chat-list-item" onclick="goToPage('open-chat','ios')"><div class="chat-list-avatar" style="background:linear-gradient(135deg,#9C27B0,#E91E63)">AM</div><div class="chat-list-info"><div class="chat-list-name">Arjun Mehta</div><div class="chat-list-preview">Sounds good! See you on court.</div></div><div class="chat-list-time">Sun</div></div>
+            <div class="chat-list-item" onclick="goToPage('open-chat','ios')"><div class="chat-list-avatar" style="background:linear-gradient(135deg,#00BCD4,#2196F3)">SM</div><div class="chat-list-info"><div class="chat-list-name">Sana Mirza</div><div class="chat-list-preview">I prefer hard courts, is that ok?</div></div><div class="chat-list-time">Fri</div></div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('home','ios')"><div class="nav-icon">🏠</div><div class="nav-label">HOME</div></div>
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('explore','ios')"><div class="nav-icon">🔍</div><div class="nav-label">EXPLORE</div></div>
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('booking','ios')"><div class="nav-icon">📅</div><div class="nav-label">BOOK</div></div>
+            <div class="nav-item active"><div class="nav-icon">💬</div><div class="nav-label">CHAT</div></div>
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('profile-page','ios')"><div class="nav-icon">👤</div><div class="nav-label">PROFILE</div></div>
+          </div>
+        </div>
+
+        <!-- OPEN CHAT -->
+        <div class="page" id="open-chat" style="display:none;flex-direction:column;">
+          <div class="status-bar"><span class="status-time">9:41</span><div class="status-icons">📶 🔋</div></div>
+          <div class="chat-header-bar">
+            <div class="back-btn" onclick="goToPage('chat-page','ios')">‹</div>
+            <div class="chat-list-avatar" style="width:38px;height:38px;font-size:14px;flex-shrink:0;">RK</div>
+            <div class="chat-header-info" style="margin-left:8px;">
+              <div class="chat-header-name">Rahul Khanna</div>
+              <div class="chat-header-status">● Online now</div>
+            </div>
+            <div class="header-action" style="margin-left:auto;" onclick="showToast('ios','Booking Request Sent!','Rahul will confirm within 1 hour')">📅</div>
+          </div>
+          <div class="messages-area" id="ios-msgs">
+            <div class="msg-bubble-wrap them"><div class="bubble">Hey! Saw your profile — want to hit some balls this Saturday?</div><div class="msg-time-sm">9:22 AM</div></div>
+            <div class="msg-bubble-wrap me"><div class="bubble">Sounds great! I'm free in the evening 🎾</div><div class="msg-time-sm">9:24 AM</div></div>
+            <div class="msg-bubble-wrap them"><div class="bubble">DLTA Complex, Court 4. ₹300/person for the slot.</div><div class="msg-time-sm">9:25 AM</div></div>
+            <div class="msg-bubble-wrap me"><div class="bubble">Perfect, count me in! Send me the booking confirmation.</div><div class="msg-time-sm">9:26 AM</div></div>
+            <div class="msg-bubble-wrap them"><div class="bubble">Done! Check your bookings tab 👍</div><div class="msg-time-sm">9:28 AM</div></div>
+          </div>
+          <div class="chat-input-bar">
+            <input class="chat-input-field" id="ios-chat-input" placeholder="Message Rahul..." onkeydown="if(event.key==='Enter')sendIosMsg()">
+            <button class="send-btn" onclick="sendIosMsg()">➤</button>
+          </div>
+        </div>
+
+        <!-- PROFILE -->
+        <div class="page" id="profile-page">
+          <div class="status-bar"><span class="status-time">9:41</span><div class="status-icons">📶 🔋</div></div>
+          <div class="scroll-area">
+            <div class="profile-hero">
+              <div class="profile-big-avatar">RS</div>
+              <div class="profile-full-name">Rahul Sharma</div>
+              <div class="profile-handle">@rahuls · Mumbai</div>
+              <div class="profile-level-badge">ADVANCED PLAYER</div>
+              <div class="profile-stats-row">
+                <div class="pstat"><div class="pstat-n">12</div><div class="pstat-l">Matches</div></div>
+                <div class="pstat"><div class="pstat-n">8</div><div class="pstat-l">Wins</div></div>
+                <div class="pstat"><div class="pstat-n">4.7</div><div class="pstat-l">Rating</div></div>
+                <div class="pstat"><div class="pstat-n">₹500</div><div class="pstat-l">Rate/hr</div></div>
+              </div>
+            </div>
+            <div class="profile-section">
+              <div class="profile-section-title">About</div>
+              <div style="font-size:14px;color:#4A6A4A;line-height:1.7;">Passionate tennis player based in Mumbai. Available evenings and weekends. Looking for regular practice partners at intermediate to advanced level.</div>
+            </div>
+            <div class="profile-section">
+              <div class="profile-section-title">Details</div>
+              <div class="info-row"><div class="info-icon">📍</div><div class="info-label">Location</div><div class="info-value">Mumbai</div></div>
+              <div class="info-row"><div class="info-icon">🏸</div><div class="info-label">Play Style</div><div class="info-value">Baseline</div></div>
+              <div class="info-row"><div class="info-icon">🖐️</div><div class="info-label">Dominant Hand</div><div class="info-value">Right</div></div>
+              <div class="info-row"><div class="info-icon">🕐</div><div class="info-label">Availability</div><div class="info-value">Evenings</div></div>
+              <div class="info-row"><div class="info-icon">💰</div><div class="info-label">Session Rate</div><div class="info-value" style="color:#00C853;">₹500/hr</div></div>
+              <div class="info-row"><div class="info-icon">📅</div><div class="info-label">Member Since</div><div class="info-value">Jan 2024</div></div>
+            </div>
+            <div class="profile-section" style="border-bottom:none;">
+              <div class="profile-section-title">Recent Reviews</div>
+              <div style="background:#161E16;border:1px solid #1E2A1E;border-radius:14px;padding:14px;margin-bottom:10px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;font-weight:600;color:#E8F5E9;">Arjun Mehta</span><span style="font-size:12px;color:#AEEA00;">★★★★★</span></div>
+                <div style="font-size:12px;color:#3A503A;">"Great player, very punctual and sportive!"</div>
+              </div>
+              <div style="background:#161E16;border:1px solid #1E2A1E;border-radius:14px;padding:14px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;font-weight:600;color:#E8F5E9;">Priya Nair</span><span style="font-size:12px;color:#AEEA00;">★★★★☆</span></div>
+                <div style="font-size:12px;color:#3A503A;">"Fun match! Strong baseline game."</div>
+              </div>
+            </div>
+            <button class="edit-profile-btn" onclick="showToast('ios','Profile Updated!','Your changes have been saved')">Edit Profile</button>
+            <div style="margin:12px 20px;"><button style="width:100%;padding:14px;background:transparent;border:1px solid #1E2A1E;border-radius:14px;font-size:14px;font-weight:600;color:#3A503A;cursor:pointer;" onclick="showToast('ios','Logging out...','See you on the court!')">Log Out</button></div>
+            <div style="height:20px;"></div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('home','ios')"><div class="nav-icon">🏠</div><div class="nav-label">HOME</div></div>
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('explore','ios')"><div class="nav-icon">🔍</div><div class="nav-label">EXPLORE</div></div>
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('booking','ios')"><div class="nav-icon">📅</div><div class="nav-label">BOOK</div></div>
+            <div class="nav-item" onclick="setActiveNav(this,'ios');goToPage('chat-page','ios')"><div class="nav-icon">💬</div><div class="nav-label">CHAT</div></div>
+            <div class="nav-item active"><div class="nav-icon">👤</div><div class="nav-label">PROFILE</div></div>
+          </div>
+        </div>
+
+      </div><!-- /screen -->
+    </div><!-- /phone ios -->
+  </div>
+
+  <!-- ANDROID DEVICE -->
+  <div>
+    <div class="device-label">🤖 Android — Pixel 7</div>
+    <div class="phone android" id="androidPhone">
+      <div class="android-bar">
+        <span class="android-time">9:41</span>
+        <div class="android-icons"><span>▲</span><span>📶</span><span>🔋</span></div>
+      </div>
+      <div class="screen" style="border-radius:28px;">
+
+        <!-- ANDROID HOME (different layout) -->
+        <div class="page active" id="a-home" style="padding-top:28px;">
+          <div class="scroll-area">
+            <div style="padding:16px 20px 20px;">
+              <div class="home-header" style="margin-bottom:16px;">
+                <div>
+                  <div class="home-greeting">Good morning 👋</div>
+                  <div class="home-name">Priya Nair</div>
+                </div>
+                <div class="avatar-btn" style="background:linear-gradient(135deg,#FF6B35,#FFB300);" onclick="goToPage('a-profile','android')">PN</div>
+              </div>
+
+              <!-- HERO BANNER -->
+              <div style="background:linear-gradient(135deg,#0A2010,#0D1A0D);border:1px solid #1E3A20;border-radius:18px;padding:20px;margin-bottom:20px;position:relative;overflow:hidden;">
+                <div style="position:absolute;right:12px;top:12px;font-size:52px;opacity:0.12;">🎾</div>
+                <div style="font-size:11px;font-family:'DM Mono';color:#00C853;letter-spacing:1.5px;margin-bottom:6px;">YOUR NEXT MATCH</div>
+                <div style="font-size:20px;font-weight:700;color:#E8F5E9;margin-bottom:10px;">No upcoming matches</div>
+                <button onclick="goToPage('a-explore','android')" style="background:#00C853;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;color:#071208;cursor:pointer;">Find a Partner →</button>
+              </div>
+
+              <!-- STATS -->
+              <div class="stats-strip" style="margin-bottom:20px;">
+                <div class="stat-card"><div class="stat-num">7</div><div class="stat-lbl">Matches</div></div>
+                <div class="stat-card"><div class="stat-num">4</div><div class="stat-lbl">Wins</div></div>
+                <div class="stat-card"><div class="stat-num">4.5</div><div class="stat-lbl">Rating</div></div>
+              </div>
+
+              <!-- QUICK ACTIONS -->
+              <div class="quick-actions" style="margin-bottom:20px;">
+                <div class="quick-btn" onclick="goToPage('a-explore','android')"><div class="qicon">🔍</div><div class="qlabel">Search</div></div>
+                <div class="quick-btn" onclick="goToPage('a-booking','android')"><div class="qicon">📅</div><div class="qlabel">Book</div></div>
+                <div class="quick-btn" onclick="goToPage('a-chat','android')"><div class="qicon">💬</div><div class="qlabel">Chat</div></div>
+                <div class="quick-btn" onclick="showAndroidToast('Payments','Opens Razorpay dashboard')"><div class="qicon">💰</div><div class="qlabel">Earn</div></div>
+              </div>
+
+              <div class="section-header">
+                <div class="section-title-sm">Top Players Near You</div>
+                <div class="see-all" onclick="goToPage('a-explore','android')">ALL →</div>
+              </div>
+              <div class="h-scroll" style="margin-bottom:20px;">
+                <div class="player-chip" onclick="showAndroidToast('Rahul Khanna','Advanced · Mumbai · ₹500/hr')"><div class="chip-avatar">RK<div class="online-dot"></div></div><div class="chip-name">Rahul Khanna</div><div class="chip-level">ADVANCED</div><div class="chip-city">📍 Mumbai</div></div>
+                <div class="player-chip" onclick="showAndroidToast('Vikram Singh','Pro Coach · ₹1200/hr')"><div class="chip-avatar blue">VS<div class="online-dot"></div></div><div class="chip-name">Vikram Singh</div><div class="chip-level">PRO COACH</div><div class="chip-city">📍 Delhi</div></div>
+                <div class="player-chip" onclick="showAndroidToast('Arjun Mehta','Advanced · ₹400/hr')"><div class="chip-avatar" style="background:linear-gradient(135deg,#FF6B35,#AEEA00)">AM</div><div class="chip-name">Arjun Mehta</div><div class="chip-level">ADVANCED</div><div class="chip-city">📍 Hyderabad</div></div>
+              </div>
+
+              <div class="section-header"><div class="section-title-sm">Latest Activity</div></div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="background:#161E16;border:1px solid #1E2A1E;border-radius:12px;padding:14px;display:flex;gap:12px;align-items:center;">
+                  <span style="font-size:24px;">🎾</span>
+                  <div><div style="font-size:13px;font-weight:600;color:#E8F5E9;">Match Completed</div><div style="font-size:11px;color:#3A503A;margin-top:2px;">vs Rahul Khanna · Won 6-4, 7-5</div></div>
+                  <div style="margin-left:auto;font-size:11px;color:#2A3A2A;font-family:'DM Mono';">2d ago</div>
+                </div>
+                <div style="background:#161E16;border:1px solid #1E2A1E;border-radius:12px;padding:14px;display:flex;gap:12px;align-items:center;">
+                  <span style="font-size:24px;">⭐</span>
+                  <div><div style="font-size:13px;font-weight:600;color:#E8F5E9;">New Review</div><div style="font-size:11px;color:#3A503A;margin-top:2px;">Arjun left you a 5-star review!</div></div>
+                  <div style="margin-left:auto;font-size:11px;color:#2A3A2A;font-family:'DM Mono';">3d ago</div>
+                </div>
+              </div>
+            </div>
+            <div style="height:20px;"></div>
+          </div>
+          <div class="bottom-nav" style="border-radius:0 0 26px 26px;">
+            <div class="nav-item active" onclick="setActiveAndroidNav(this)"><div class="nav-icon">🏠</div><div class="nav-label">HOME</div></div>
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-explore','android')"><div class="nav-icon">🔍</div><div class="nav-label">EXPLORE</div></div>
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-booking','android')"><div class="nav-icon">📅</div><div class="nav-label">BOOK</div></div>
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-chat','android')"><div class="nav-icon">💬</div><div class="nav-label">CHAT</div></div>
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-profile','android')"><div class="nav-icon">👤</div><div class="nav-label">PROFILE</div></div>
+          </div>
+          <div class="app-toast" id="toast-android" style="bottom:88px;"><div class="toast-t" id="toast-t-android"></div><div class="toast-m" id="toast-m-android"></div></div>
+        </div>
+
+        <!-- ANDROID EXPLORE -->
+        <div class="page" id="a-explore" style="padding-top:28px;">
+          <div class="page-header" style="padding-top:12px;"><div class="page-title">FIND PLAYERS</div><div class="header-action">🎯</div></div>
+          <div class="scroll-area">
+            <div style="padding:0 20px;">
+              <div class="search-bar" style="margin-bottom:14px;"><span>🔍</span><span>Search by city, level...</span></div>
+              <div class="filter-chips" style="margin-bottom:18px;">
+                <div class="chip active">All</div>
+                <div class="chip" onclick="toggleChip(this)">Mumbai</div>
+                <div class="chip" onclick="toggleChip(this)">Delhi</div>
+                <div class="chip" onclick="toggleChip(this)">Bangalore</div>
+                <div class="chip" onclick="toggleChip(this)">Free</div>
+              </div>
+              <div class="player-row" onclick="showAndroidToast('Rahul Khanna booked!','Check your bookings tab')"><div class="row-avatar">RK</div><div class="row-info"><div class="row-name">Rahul Khanna</div><div class="row-sub">📍 Mumbai · Evenings</div><div class="row-tags"><span class="tag tag-orange">Advanced</span><span class="tag tag-green">● Online</span></div></div><div class="row-right"><div class="row-rate">₹500</div><div class="row-rate-label">/hr</div><div class="row-stars">★ 4.8</div></div></div>
+              <div class="player-row" onclick="showAndroidToast('Vikram Singh — Pro Coach','₹1200/hr · Book now')"><div class="row-avatar blue">VS</div><div class="row-info"><div class="row-name">Vikram Singh</div><div class="row-sub">📍 Delhi · Mornings</div><div class="row-tags"><span class="tag tag-orange">Pro Coach</span><span class="tag tag-green">● Online</span></div></div><div class="row-right"><div class="row-rate">₹1200</div><div class="row-rate-label">/hr</div><div class="row-stars">★ 4.9</div></div></div>
+              <div class="player-row" onclick="showAndroidToast('Arjun Mehta','Advanced · ₹400/hr · Evenings')"><div class="row-avatar" style="background:linear-gradient(135deg,#FF6B35,#AEEA00)">AM</div><div class="row-info"><div class="row-name">Arjun Mehta</div><div class="row-sub">📍 Hyderabad · Evenings</div><div class="row-tags"><span class="tag tag-lime">Advanced</span></div></div><div class="row-right"><div class="row-rate">₹400</div><div class="row-rate-label">/hr</div><div class="row-stars">★ 4.7</div></div></div>
+              <div class="player-row" onclick="showAndroidToast('Sana Mirza','Free · Chennai · Mornings')"><div class="row-avatar" style="background:linear-gradient(135deg,#00BCD4,#2196F3)">SM</div><div class="row-info"><div class="row-name">Sana Mirza</div><div class="row-sub">📍 Chennai · Mornings</div><div class="row-tags"><span class="tag tag-lime">Intermediate</span></div></div><div class="row-right"><div class="row-rate" style="color:#AEEA00;">FREE</div><div class="row-rate-label">/session</div><div class="row-stars">★ 4.6</div></div></div>
+            </div>
+            <div style="height:20px;"></div>
+          </div>
+          <div class="bottom-nav" style="border-radius:0 0 26px 26px;">
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-home','android')"><div class="nav-icon">🏠</div><div class="nav-label">HOME</div></div>
+            <div class="nav-item active"><div class="nav-icon">🔍</div><div class="nav-label">EXPLORE</div></div>
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-booking','android')"><div class="nav-icon">📅</div><div class="nav-label">BOOK</div></div>
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-chat','android')"><div class="nav-icon">💬</div><div class="nav-label">CHAT</div></div>
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-profile','android')"><div class="nav-icon">👤</div><div class="nav-label">PROFILE</div></div>
+          </div>
+        </div>
+
+        <!-- ANDROID BOOKING -->
+        <div class="page" id="a-booking" style="padding-top:28px;">
+          <div class="page-header" style="padding-top:12px;"><div class="page-title">MY BOOKINGS</div><div class="header-action" onclick="showAndroidToast('Slot Added!','Your availability is now public')">＋</div></div>
+          <div class="scroll-area">
+            <div style="padding:0 20px;">
+              <div class="booking-tabs"><div class="btab active" onclick="switchBTab(this)">Slots</div><div class="btab" onclick="switchBTab(this)">Confirmed</div><div class="btab" onclick="switchBTab(this)">Past</div></div>
+              <div class="calendar-strip">
+                <div class="cal-day"><div class="cal-dow">MON</div><div class="cal-date">17</div></div>
+                <div class="cal-day active"><div class="cal-dow">TUE</div><div class="cal-date">18</div></div>
+                <div class="cal-day"><div class="cal-dow">WED</div><div class="cal-date">19</div></div>
+                <div class="cal-day"><div class="cal-dow">THU</div><div class="cal-date">20</div></div>
+                <div class="cal-day"><div class="cal-dow">FRI</div><div class="cal-date">21</div></div>
+              </div>
+              <div class="slot-list">
+                <div class="slot-item" onclick="bookSlotApp('android','7:00 AM')"><div class="slot-time-text">7:00 AM</div><div class="slot-meta"><div class="slot-player">Open Slot</div><div class="slot-court">Bangalore Club, Court 1</div></div><div class="slot-status-pill pill-green">OPEN</div></div>
+                <div class="slot-item booked"><div class="slot-time-text">9:00 AM</div><div class="slot-meta"><div class="slot-player">Rahul vs Sana</div><div class="slot-court">Cubbon Park Courts</div></div><div class="slot-status-pill pill-gray">BOOKED</div></div>
+                <div class="slot-item" onclick="bookSlotApp('android','4:00 PM')"><div class="slot-time-text">4:00 PM</div><div class="slot-meta"><div class="slot-player">Open Slot</div><div class="slot-court">KSLTA Courts, Court B</div></div><div class="slot-status-pill pill-green">OPEN</div></div>
+                <div class="slot-item" onclick="bookSlotApp('android','6:00 PM')"><div class="slot-time-text">6:00 PM</div><div class="slot-meta"><div class="slot-player">Open Slot</div><div class="slot-court">Bangalore Club, Court 3</div></div><div class="slot-status-pill pill-green">OPEN</div></div>
+              </div>
+            </div>
+            <div style="height:20px;"></div>
+          </div>
+          <div class="bottom-nav" style="border-radius:0 0 26px 26px;">
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-home','android')"><div class="nav-icon">🏠</div><div class="nav-label">HOME</div></div>
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-explore','android')"><div class="nav-icon">🔍</div><div class="nav-label">EXPLORE</div></div>
+            <div class="nav-item active"><div class="nav-icon">📅</div><div class="nav-label">BOOK</div></div>
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-chat','android')"><div class="nav-icon">💬</div><div class="nav-label">CHAT</div></div>
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-profile','android')"><div class="nav-icon">👤</div><div class="nav-label">PROFILE</div></div>
+          </div>
+        </div>
+
+        <!-- ANDROID CHAT -->
+        <div class="page" id="a-chat" style="padding-top:28px;">
+          <div class="page-header" style="padding-top:12px;"><div class="page-title">MESSAGES</div><div class="header-action">✏️</div></div>
+          <div class="scroll-area" style="padding:0 20px;">
+            <div class="chat-list-item" onclick="goToPage('a-open-chat','android')"><div class="chat-list-avatar">RK<div class="unread-badge">2</div></div><div class="chat-list-info"><div class="chat-list-name">Rahul Khanna</div><div class="chat-list-preview">Let's confirm for Saturday 🎾</div></div><div class="chat-list-time">Now</div></div>
+            <div class="chat-list-item" onclick="goToPage('a-open-chat','android')"><div class="chat-list-avatar blue">VS</div><div class="chat-list-info"><div class="chat-list-name">Vikram Singh</div><div class="chat-list-preview">Great session today! See you Wednesday.</div></div><div class="chat-list-time">1h ago</div></div>
+            <div class="chat-list-item" onclick="goToPage('a-open-chat','android')"><div class="chat-list-avatar" style="background:linear-gradient(135deg,#9C27B0,#E91E63)">AM</div><div class="chat-list-info"><div class="chat-list-name">Arjun Mehta</div><div class="chat-list-preview">Your backhand is getting so strong!</div></div><div class="chat-list-time">Yesterday</div></div>
+          </div>
+          <div class="bottom-nav" style="border-radius:0 0 26px 26px;">
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-home','android')"><div class="nav-icon">🏠</div><div class="nav-label">HOME</div></div>
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-explore','android')"><div class="nav-icon">🔍</div><div class="nav-label">EXPLORE</div></div>
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-booking','android')"><div class="nav-icon">📅</div><div class="nav-label">BOOK</div></div>
+            <div class="nav-item active"><div class="nav-icon">💬</div><div class="nav-label">CHAT</div></div>
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-profile','android')"><div class="nav-icon">👤</div><div class="nav-label">PROFILE</div></div>
+          </div>
+        </div>
+
+        <!-- ANDROID OPEN CHAT -->
+        <div class="page" id="a-open-chat" style="display:none;flex-direction:column;padding-top:28px;">
+          <div class="chat-header-bar">
+            <div class="back-btn" onclick="goToPage('a-chat','android')">‹</div>
+            <div class="chat-list-avatar" style="width:38px;height:38px;font-size:14px;flex-shrink:0;">RK</div>
+            <div class="chat-header-info" style="margin-left:8px;">
+              <div class="chat-header-name">Rahul Khanna</div>
+              <div class="chat-header-status">● Online</div>
+            </div>
+            <div class="header-action" style="margin-left:auto;" onclick="showAndroidToast('Booking Sent!','Rahul will confirm soon')">📅</div>
+          </div>
+          <div class="messages-area" id="android-msgs">
+            <div class="msg-bubble-wrap them"><div class="bubble">Hey Priya! Want to play doubles this weekend?</div><div class="msg-time-sm">8:15 AM</div></div>
+            <div class="msg-bubble-wrap me"><div class="bubble">Yes! I'm free Saturday afternoon 🎾</div><div class="msg-time-sm">8:18 AM</div></div>
+            <div class="msg-bubble-wrap them"><div class="bubble">Perfect. KSLTA Court B at 4 PM?</div><div class="msg-time-sm">8:20 AM</div></div>
+            <div class="msg-bubble-wrap me"><div class="bubble">Booked! See you there 💪</div><div class="msg-time-sm">8:21 AM</div></div>
+          </div>
+          <div class="chat-input-bar">
+            <input class="chat-input-field" id="android-chat-input" placeholder="Message Rahul..." onkeydown="if(event.key==='Enter')sendAndroidMsg()">
+            <button class="send-btn" onclick="sendAndroidMsg()">➤</button>
+          </div>
+        </div>
+
+        <!-- ANDROID PROFILE -->
+        <div class="page" id="a-profile" style="padding-top:28px;">
+          <div class="scroll-area">
+            <div class="profile-hero">
+              <div class="profile-big-avatar" style="background:linear-gradient(135deg,#FF6B35,#FFB300);">PN</div>
+              <div class="profile-full-name">Priya Nair</div>
+              <div class="profile-handle">@priyan · Bangalore</div>
+              <div class="profile-level-badge">INTERMEDIATE PLAYER</div>
+              <div class="profile-stats-row">
+                <div class="pstat"><div class="pstat-n">7</div><div class="pstat-l">Matches</div></div>
+                <div class="pstat"><div class="pstat-n">4</div><div class="pstat-l">Wins</div></div>
+                <div class="pstat"><div class="pstat-n">4.5</div><div class="pstat-l">Rating</div></div>
+                <div class="pstat"><div class="pstat-n">Free</div><div class="pstat-l">Rate</div></div>
+              </div>
+            </div>
+            <div class="profile-section">
+              <div class="profile-section-title">About</div>
+              <div style="font-size:14px;color:#4A6A4A;line-height:1.7;">Passionate weekend player. Love doubles! Improving my backhand slice this season. Looking for friendly practice partners in Bangalore.</div>
+            </div>
+            <div class="profile-section">
+              <div class="profile-section-title">Details</div>
+              <div class="info-row"><div class="info-icon">📍</div><div class="info-label">Location</div><div class="info-value">Bangalore</div></div>
+              <div class="info-row"><div class="info-icon">🏸</div><div class="info-label">Play Style</div><div class="info-value">All-court</div></div>
+              <div class="info-row"><div class="info-icon">🖐️</div><div class="info-label">Hand</div><div class="info-value">Left-handed</div></div>
+              <div class="info-row"><div class="info-icon">🕐</div><div class="info-label">Available</div><div class="info-value">Weekends</div></div>
+              <div class="info-row"><div class="info-icon">💰</div><div class="info-label">Rate</div><div class="info-value" style="color:#AEEA00;">Free</div></div>
+            </div>
+            <button class="edit-profile-btn" onclick="showAndroidToast('Profile Saved!','Your changes are live')">Edit Profile</button>
+            <div style="margin:12px 20px 0;"><button style="width:100%;padding:14px;background:transparent;border:1px solid #1E2A1E;border-radius:14px;font-size:14px;font-weight:600;color:#3A503A;cursor:pointer;" onclick="showAndroidToast('Logged out','See you on the court!')">Log Out</button></div>
+            <div style="height:20px;"></div>
+          </div>
+          <div class="bottom-nav" style="border-radius:0 0 26px 26px;">
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-home','android')"><div class="nav-icon">🏠</div><div class="nav-label">HOME</div></div>
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-explore','android')"><div class="nav-icon">🔍</div><div class="nav-label">EXPLORE</div></div>
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-booking','android')"><div class="nav-icon">📅</div><div class="nav-label">BOOK</div></div>
+            <div class="nav-item" onclick="setActiveAndroidNav(this);goToPage('a-chat','android')"><div class="nav-icon">💬</div><div class="nav-label">CHAT</div></div>
+            <div class="nav-item active"><div class="nav-icon">👤</div><div class="nav-label">PROFILE</div></div>
+          </div>
+        </div>
+
+      </div><!-- /screen android -->
+    </div><!-- /phone android -->
+  </div>
+
+</div><!-- /device-wrap -->
+
+<script>
+// iOS Navigation
+const iosPages = ['splash','home','explore','booking','chat-page','open-chat','profile-page'];
+function goToPage(id, device) {
+  if(device === 'ios') {
+    iosPages.forEach(p => { const el = document.getElementById(p); if(el) { el.style.display='none'; el.classList.remove('active'); } });
+    const target = document.getElementById(id);
+    if(target) { target.style.display='flex'; target.classList.add('active'); }
+  } else {
+    const androidPages = ['a-home','a-explore','a-booking','a-chat','a-open-chat','a-profile'];
+    androidPages.forEach(p => { const el = document.getElementById(p); if(el) { el.style.display='none'; el.classList.remove('active'); } });
+    const target = document.getElementById(id);
+    if(target) { target.style.display='flex'; target.classList.add('active'); }
+  }
+}
+
+function setActiveNav(el, device) {
+  const phone = document.getElementById('iosPhone');
+  phone.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+}
+function setActiveAndroidNav(el) {
+  const phone = document.getElementById('androidPhone');
+  phone.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function toggleChip(el) {
+  el.closest('.filter-chips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+function switchBTab(el) {
+  el.closest('.booking-tabs').querySelectorAll('.btab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function showToast(device, title, msg) {
+  const t = document.getElementById('toast-' + device);
+  document.getElementById('toast-t-' + device).textContent = title;
+  document.getElementById('toast-m-' + device).textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+function showAndroidToast(title, msg) { showToast('android', title, msg); }
+
+function bookSlotApp(device, time) {
+  showToast(device, '🎾 Slot Booked!', time + ' slot confirmed. Check your bookings!');
+}
+function openLoginModal() {
+  showToast('ios', 'Welcome Back!', 'Login screen would open here.');
+}
+
+// iOS Chat
+function sendIosMsg() {
+  const input = document.getElementById('ios-chat-input');
+  const text = input.value.trim(); if(!text) return;
+  const msgs = document.getElementById('ios-msgs');
+  const now = new Date(); const t = now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes();
+  msgs.innerHTML += `<div class="msg-bubble-wrap me"><div class="bubble">${text}</div><div class="msg-time-sm">${t}</div></div>`;
+  msgs.scrollTop = msgs.scrollHeight; input.value = '';
+  const replies = ["Sounds great! 🎾","Let me check and confirm.","Perfect! See you on court.","I'll book the slot right now!"];
+  setTimeout(() => {
+    msgs.innerHTML += `<div class="msg-bubble-wrap them"><div class="bubble">${replies[Math.floor(Math.random()*replies.length)]}</div><div class="msg-time-sm">${t}</div></div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1000);
+}
+
+// Android Chat
+function sendAndroidMsg() {
+  const input = document.getElementById('android-chat-input');
+  const text = input.value.trim(); if(!text) return;
+  const msgs = document.getElementById('android-msgs');
+  const now = new Date(); const t = now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes();
+  msgs.innerHTML += `<div class="msg-bubble-wrap me"><div class="bubble">${text}</div><div class="msg-time-sm">${t}</div></div>`;
+  msgs.scrollTop = msgs.scrollHeight; input.value = '';
+  const replies = ["Awesome! 🎾","Confirmed, see you there!","That works for me!","Great, let's play!"];
+  setTimeout(() => {
+    msgs.innerHTML += `<div class="msg-bubble-wrap them"><div class="bubble">${replies[Math.floor(Math.random()*replies.length)]}</div><div class="msg-time-sm">${t}</div></div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1000);
+}
+</script>
+</body>
+</html>
